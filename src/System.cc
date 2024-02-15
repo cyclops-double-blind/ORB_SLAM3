@@ -1400,6 +1400,11 @@ void System::InsertTrackTime(double& time)
 }
 #endif
 
+
+cv::Mat System::GetTrackingFrameImage(float imageScale) {
+    return mpFrameDrawer->DrawFrame(imageScale);
+}
+
 bool System::isIMUInitialized() {
     return mpAtlas->isImuInitialized();
 }

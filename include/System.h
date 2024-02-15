@@ -192,6 +192,7 @@ public:
     void InsertTrackTime(double& time);
 #endif
 
+    cv::Mat GetTrackingFrameImage(float imageScale=1.f);
     bool isIMUInitialized();
 
 private:
