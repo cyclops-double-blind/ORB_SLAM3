@@ -192,6 +192,8 @@ public:
     void InsertTrackTime(double& time);
 #endif
 
+    bool isIMUInitialized();
+
 private:
 
     void SaveAtlas(int type);

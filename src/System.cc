@@ -1400,6 +1400,10 @@ void System::InsertTrackTime(double& time)
 }
 #endif
 
+bool System::isIMUInitialized() {
+    return mpAtlas->isImuInitialized();
+}
+
 void System::SaveAtlas(int type){
     if(!mStrSaveAtlasToFile.empty())
     {
