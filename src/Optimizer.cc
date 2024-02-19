@@ -3039,12 +3039,29 @@ Eigen::MatrixXd Optimizer::Marginalize(const Eigen::MatrixXd &H, const int &star
     return res;
 }
 
-void Optimizer::InertialOptimization(Map *pMap, Eigen::Matrix3d &Rwg, double &scale, Eigen::Vector3d &bg, Eigen::Vector3d &ba, bool bMono, Eigen::MatrixXd  &covInertial, bool bFixedVel, bool bGauss, float priorG, float priorA)
+void Optimizer::InertialOptimization(Map *pMap, Eigen::Matrix3d &Rwg, double &scale, Eigen::Vector3d &bg, Eigen::Vector3d &ba, bool bMono, Eigen::MatrixXd  &covInertial, std::ofstream& fDump, bool bFixedVel, bool bGauss, float priorG, float priorA)
 {
     Verbose::PrintMess("inertial optimization", Verbose::VERBOSITY_NORMAL);
     int its = 200;
     long unsigned int maxKFid = pMap->GetMaxKFid();
     const vector<KeyFrame*> vpKFs = pMap->GetAllKeyFrames();
+
+    for (auto keyframe : vpKFs) {
+      auto sfm_pose = keyframe->GetPose();
+
+      auto t = keyframe->mTimeStamp;
+      auto p = sfm_pose.translation();
+      auto q = sfm_pose.so3().unit_quaternion();
+
+      fDump << t << ",";
+      fDump << q.w() << ",";
+      fDump << q.x() << ",";
+      fDump << q.y() << ",";
+      fDump << q.z() << ",";
+      fDump << p.x() << ",";
+      fDump << p.y() << ",";
+      fDump << p.z() << std::endl;
+    }
 
     // Setup optimizer
     g2o::SparseOptimizer optimizer;
@@ -3183,6 +3200,7 @@ void Optimizer::InertialOptimization(Map *pMap, Eigen::Matrix3d &Rwg, double &sc
     optimizer.optimize(its);
 
     scale = VS->estimate();
+    fDump << scale << std::endl;
 
     // Recover optimized data
     // Biases

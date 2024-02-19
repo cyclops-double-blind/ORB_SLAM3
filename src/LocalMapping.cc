@@ -49,6 +49,12 @@ LocalMapping::LocalMapping(System* pSys, Atlas *pAtlas, const float bMonocular, 
     nLBA_abort = 0;
 #endif
 
+    mfInitializationDump.open(
+        "/var/log/orbslam3.dump.initialization", std::ios::out | std::ios::app);
+    mfInitializationDump << std::setprecision(19);
+
+    if (!mfInitializationDump.is_open())
+      throw std::domain_error("failed to open dump file");
 }
 
 void LocalMapping::SetLoopCloser(LoopClosing* pLoopCloser)
@@ -1264,7 +1270,7 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
     mInitTime = mpTracker->mLastFrame.mTimeStamp-vpKF.front()->mTimeStamp;
 
     std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
-    Optimizer::InertialOptimization(mpAtlas->GetCurrentMap(), mRwg, mScale, mbg, mba, mbMonocular, infoInertial, false, false, priorG, priorA);
+    Optimizer::InertialOptimization(mpAtlas->GetCurrentMap(), mRwg, mScale, mbg, mba, mbMonocular, infoInertial, mfInitializationDump, false, false, priorG, priorA);
 
     std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 
@@ -1295,6 +1301,8 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
     mpTracker->UpdateFrameIMU(1.0,vpKF[0]->GetImuBias(),mpCurrentKeyFrame);
     if (!mpAtlas->isImuInitialized())
     {
+        mfInitializationDump << "Initialization successed at: " << mpTracker->mLastFrame.mTimeStamp << std::endl;
+
         mpAtlas->SetImuInitialized();
         mpTracker->t0IMU = mpTracker->mCurrentFrame.mTimeStamp;
         mpCurrentKeyFrame->bImu = true;

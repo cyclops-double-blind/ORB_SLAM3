@@ -194,6 +194,7 @@ protected:
 
     //DEBUG
     ofstream f_lm;
+    std::ofstream mfInitializationDump;
 
     };
 
